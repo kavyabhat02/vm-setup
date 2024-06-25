@@ -1,7 +1,7 @@
 # vm-setup
 Setting up VMs:
-1. Copy the contents of the test/ folder into your destination folder.
-
+1. Copy the files in this repo to your destination folder.
+  
 2. Open virtual-machines and edit:
 - MAX_DISK_SIZE: Can generally retain 128G
 - HOSTNAME: Give a meaningful name here, generally related to the project. Easier to keep track of running VMs.
