@@ -11,7 +11,7 @@ Setting up VMs:
 - ./virtual-machines setup
 - ./virtual-machines start
 
-During setup, you'll be prompted while enabling password based authentication for SSH on the virtual machines. 
+During setup, you'll be prompted while enabling password based authentication for SSH on the virtual machines. <br />
 Note: The default credentials for every VM is student / pass .
 
 4. sudo netstat -tulnp
