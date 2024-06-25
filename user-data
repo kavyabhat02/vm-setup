@@ -1,0 +1,11 @@
+#cloud-config
+
+users:
+  - name: student
+    shell: /bin/bash
+    lock_passwd: false
+    passwd: $6$X0vAFd2ivngKpxZ$y8pdRqr5.VUI/Ihs8cV93zE/8xUVEI1po57pSgwJp9s7L/BUktIpGBsNqlJ7F0cFxLeBdgF8pJckH7JKWDeay0
+    groups: [ sudo ]
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC1wkVQAFyjT1MO6Ugkt0knhRjOGw5J5VN7nbU5k6miwYVCDuiZmqXYMIEZbOj/vCf18DfanWzAvPyYxYmRxctln09t9sj5c20/Frm0x0Vl73FmjFlFAOKfjznqbv4ceHYxwxfpIRiYxoCPUS4lRo0k8GYU0m/KVUoCWoZIQUnYY0Xd67/+yMpo+KBtwe0oB2DuojVajJtphnzdqpTTgHK1LBtUeXVkFtu/LPGFoYyKm3WUot7wW7Seqj6GEJQ9b3QLKyDJFkD/MmYflkkzlGR7/2YyYVqNiC78TaZQ/lgxa27Ueixk52/4FazZfyrYPHz24r0x5ZXZJhti557Sh04SXlmE7s5Qe+vG9Xf4SOXTN9ofNmgY8DfWy7a9akYY/6ocuHm45grEjvYZDtd3S5WTOwPkIEB3gFyg4WlrCSQXFDqgs6ZFQRvrZHNF9Xg9kR9Vt6HyiipEanA8M5sdMjCay9niRi+GvZHkiCJgT+SvlG5ZxsU4U59GkOWK8aqPKfE= tahiliani@poweredge-r740-2
+

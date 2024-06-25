@@ -1,0 +1,146 @@
+#!/bin/bash
+
+USERNAME=student
+
+MAX_DISK_SIZE=128G
+
+HOSTNAME=vm
+
+declare -A PORT=(
+	[$HOSTNAME-0]=50020
+	[$HOSTNAME-1]=50021
+#	[$HOSTNAME-2]=50022
+#	[$HOSTNAME-3]=50023
+#	[$HOSTNAME-4]=50024
+#	[$HOSTNAME-5]=50025
+)
+
+num=${#PORT[@]}
+range=$((num-1))
+
+print_usage()
+{
+	echo "usage: ${0} <command> [command arguments]"
+	echo ""
+	echo "    commands:"
+	echo "        setup  - setup the virtual-machines"
+	echo "        start  - start the virtual-machines"
+	echo "        stop   - stop the virtual-machines"
+	echo ""
+}
+
+destroy_virtual_machines()
+{
+	printf "Destroying virtual machines ... \n"
+	for i in $(seq 0 $range)
+        do
+		virtual_machine=$HOSTNAME-$i
+                virsh shutdown ${virtual_machine}
+		virsh undefine ${virtual_machine}
+        done
+
+        wait
+
+        sleep 10
+
+        printf "done\n"
+}
+
+stop_virtual_machines()
+{
+	printf "Stopping virtual machines ... \n"
+
+	for i in $(seq 0 $range)
+	do
+		virtual_machine=$HOSTNAME-$i
+		virsh shutdown ${virtual_machine}
+	done
+
+	wait
+
+	sleep 10
+
+	printf "done\n"
+}
+
+start_virtual_machines()
+{
+	printf "Starting virtual machines ... \n"
+
+	for i in $(seq 0 $range)
+	do
+		virtual_machine=$HOSTNAME-$i
+		virsh start ${virtual_machine}
+	done
+
+	wait
+
+	sleep 10
+
+	printf "done\n"
+}
+
+setup_virtual_machines()
+{
+	destroy_virtual_machines
+
+	rm -rf disk-images
+	rm -rf iso-images
+	mkdir -p disk-images
+	mkdir -p iso-images
+
+	for i in $(seq 0 $range)
+	do
+		virtual_machine=$HOSTNAME-$i
+		printf "\n Creating base qcow2 image \n"
+
+		echo -en "instance-id: ${virtual_machine}\nlocal-hostname: ${virtual_machine}" > meta-data
+
+        	qemu-img create -b /home/tahiliani/cloud-images/jammy-server-cloudimg-amd64.img -f qcow2 -F qcow2 disk-images/${virtual_machine}.qcow2 128G
+
+		sleep 10
+
+       		printf "\n Generating ISO image \n"
+        	genisoimage -output iso-images/${virtual_machine}.iso -V cidata -r -J user-data meta-data
+        	sleep 10
+
+        	printf "\n Setting up machine \n"
+        	virt-install --name=${virtual_machine} --ram=16384 --vcpus sockets=1,cores=16,threads=2 --import --disk path=disk-images/${virtual_machine}.qcow2,format=qcow2 --disk path=iso-images/${virtual_machine}.iso,device=cdrom --os-variant=ubuntu20.04 --network bridge=virbr0,model=virtio --graphics vnc,listen=0.0.0.0 --noautoconsole --check path_in_use=off --qemu-commandline="-netdev user,id=eth0,hostfwd=tcp::${PORT[${virtual_machine}]}-:22 -device e1000,netdev=eth0" > /dev/null
+        	sleep 10
+        
+		printf "\n Enabling SSH password auth ... \n"
+        	ssh-keygen -f "/home/tahiliani/.ssh/known_hosts" -R "[localhost]:${PORT[${virtual_machine}]}"
+        	sleep 10
+
+        	ssh -Y -t -p ${PORT[${virtual_machine}]} student@localhost 'sudo bash -c "echo 'PasswordAuthentication yes' > /etc/ssh/sshd_config.d/60-cloudimg-settings.conf"'
+
+	done
+
+	stop_virtual_machines > /dev/null
+
+	printf "\n"
+}
+
+case ${1} in
+	"setup" )
+		setup_virtual_machines
+	;;
+
+	"start" )
+		start_virtual_machines
+	;;
+
+	"stop" )
+		stop_virtual_machines
+	;;
+
+        "destroy" )
+		destroy_virtual_machines
+	;;
+
+	* )
+		print_usage
+
+		exit 1
+esac
+
